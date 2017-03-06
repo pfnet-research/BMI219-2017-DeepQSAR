@@ -1,0 +1,7 @@
+*~
+.*
+!.gitignore
+*.h5
+*.pyc
+result/
+/data
