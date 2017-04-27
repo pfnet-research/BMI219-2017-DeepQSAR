@@ -18,7 +18,7 @@ from lib.models import mlp
 parser = argparse.ArgumentParser(
     description='Multitask Learning with PubChem dataset.')
 # general
-parser.add_argument('--gpu', '-g', type=int, default=0,
+parser.add_argument('--gpu', '-g', type=int, default=-1,
                     help='GPU ID (negative value indicates CPU)')
 parser.add_argument('--seed', '-s', default=0, type=int,
                     help='random seed')
