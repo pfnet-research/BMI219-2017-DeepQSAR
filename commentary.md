@@ -7,14 +7,12 @@ Recently, Dahl et al. [1] applied deep learning to QSAR tasks and achieved
 better prediction accuracy.
 This work opened the door of application of Deep Learning (DL) to bioinformatics fields.
 
+We follow the experiment of [1], with small modifications because of some technical issues.
 In this example, we will learn
 
 * how to prepare training/testing datasets for the task with PubChem dataset.
 * how to build, train, and evaluate DL model with Chainer.
 * how to test your code with unit tests.
-
-We follow the experiment of [1], with the small modifications
-because of some technical issues.
 
 # Dataset creation
 
@@ -141,7 +139,7 @@ As target labels are binary, it is common to use
 the *cross entropy* loss defined as
 
 ```
-cross_entropy(p, t) = \sum_{i=1}^N y_i \log p_i + (1 - y_i) \log p_i,
+cross_entropy(p, t) = \sum_{i=1}^N y_i \log p_i + (1 - y_i) \log (1 - p_i),
 ```
 
 where `p` and `t` is a 1-dimensional array of length `N` whose
