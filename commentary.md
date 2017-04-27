@@ -1,54 +1,72 @@
 # Introduction
 
-*Quantitative Structure-Property Relationship* (QSAR in short) is a study of the relationship between
-chemical structures and biological characteristics (e.g. toxicity) of compounds.
-The goal of this example is to construct a model with a neural network
-that predicts the outcome of assays.
+*Quantitative Structure-Property Relationship* (QSAR in short) is a study of
+relationship between structures and biological characteristics
+(e.g. toxicity) of chemical compounds.
+Recently, Dahl et al. [1] applied deep learning to QSAR tasks and achieved
+better prediction accuracy.
+This work opened the door of application of Deep Learning (DL) to bioinformatics fields.
+
+In this example, we will learn
+
+* how to prepare training/testing datasets for the task with PubChem dataset.
+* how to build, train, and evaluate DL model with Chainer.
+* how to test your code with unit tests.
+
+We follow the experiment of [1], with the small modifications
+because of some technical issues.
 
 # Dataset creation
 
-## Data retrieval
+Dataset creation is implemented in `tools/kaggle.py`.
+We will describe the procedure of this function in this section.
 
-Dataset retrieval is implemented as `get_kaggle` method in `tools/kaggle.py`.
+## Retrieval
 
-We use the same dataset as [1] for training and validating neural networks.
-Dataset from 15 assays.
-We create one task from one assay, except assay No. 1851,
-from which we create 5 tasks.
-So, we have 19 tasks in total.
+The dataset we use in this example is same as [1].
+We select 15 assays in the PubChem dataset and create one task per one assay,
+except assay ID (AID) 1851, from which we create 5 tasks.
+So, the dataset consists of 19 tasks in total.
 
-We use Substance ID (SID in short) to identify substances.
+Each task consists of a pair of chemical compounds and assay outcomes.
+In one assay, each compound has one of five labels that represents the outcome for the substance (Probe, Active, Inactive, Inconclusive, or Untested).
+For each task, we filter out compounds that has labels other than Active and Inactive.
+Assay no. 1851 contains five independent assays to the same set of compounds.
+We separate and treat them as five independent tasks.
 
-Substances in each assay have one of five labels that indicates the outcome of the assay for the substance
-(Probe, Active, Inactive, Inconclusive, or Untested).
-We retrieve the chemical structure of substances that has a label
-Active or Inactive in at least one tasks as SDF.
-Pubchem has a REST API for retrieving the dataset. We used it.
+As one compound can occur in several tasks.
+We have to identify substances in different tasks.
+PubChem assigns two types of IDs, namely, compound ID (CID) and substance ID (SID) to compounds.
+We use SID to identify them and 56326 compounds have either Active or Inactive
+label in at least one tasks.
+We retrieve the chemical structure of compounds in [SDF file format](https://en.wikipedia.org/wiki/Chemical_table_file#SDF) and convert
+it to [SMILES](https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system).
+with [RDKit](http://www.rdkit.org).
 
-We get 56326 substances in total.
+Pubchem has a REST API for retrieving its dataset.
+But as data retrieval through the REST API takes long time,
+we retrieved the dataset in advance and store the data in [HDF5 format](https://support.hdfgroup.org/HDF5/).
+If you want to check the raw dataset. You can download it from
+[here](https://www.dropbox.com/s/g25vyeralmba4d0/pubchem.h5?raw=1).
+If you are interested in PubChem REST API, see [the official document](https://pubchem.ncbi.nlm.nih.gov/pug_rest/PUG_REST.html)
+ for the detail specification.
 
 ## Preprocessing
 
-We encode labels Active and Inactive as 1 and 0, respectively and others as -1 that indicates "missing".
-We convert the chemical structures of substances into fixed-length bit vector called *fingerprint*.
+We encode labels into ternary values.
+Active and Inactive are converted as 1 and 0, respectively.
+If a compound is not found in some task, or has labels other than Active
+or Inactive, its label corresponds to the task is set to -1 that indicates "missing".
 
-There are many software algorithms to encode chemical compounds to fingerprint.
-In original paper [1], the authors used DRAGON to create fingerprint.
-But as DRAGON is a proprietary software, we use the ECFP algorithm implemented in RDKit instead.
+Compounds are converted into fixed-length bit vectors called *fingerprint*.
+There are many algorithms and softwares to encode compounds to fingerprint.
+In the original paper [1], the authors used [DRAGON](https://chm.kode-solutions.net/products_dragon.php).
+But as it is a proprietary software, we use the ECFP algorithm implemented in RDKit instead.
 
-In summary, the preprocessed dataset is a pair of a vector of fingerprints and a vector of labels
-Each fingerprint is a fixed-length bit vector.
-In the context of machine leanring, the input data is called *feature*, or *feature vector*.
-We treat it as a feature vector.
-Each label is also a binary vector whose length is 19, which is same as the number of tasks.
-
-## Preprocessed dataset
-
-As data retrieval through the REST API and conversion to SMILES take long time,
-we have done it and uploaded the preprocessed data.
-
-If you want to check the retrieved dataset. You can download it from
-https://www.dropbox.com/s/g25vyeralmba4d0/pubchem.h5?raw=1
+In summary, the preprocessed dataset consists of 19 tasks, each of which
+is a pair of a list of fingerprints and a list of labels.
+In the context of machine learning, the input data fed to the model (fingerprint
+  in this context) is called *feature*, or *feature vector*.
 
 # Model
 

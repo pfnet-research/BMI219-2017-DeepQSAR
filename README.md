@@ -1,35 +1,34 @@
-# Multitask learning for QSAR prediction
+# Multitask learning with multi layer perceptron for QSAR
 
-This is an example of multitask learning for QSAR prediction.
-This example is based on [1], but some minor modification is applied.
+This is an example of the application of deep learning to
+Quantitative structure–activity relationship (QSAR) prediction.
 
-We use Chainer to build, train, and evaluate neural networks.
-We use PubChem as a dataset of assay outcomes and chemical structure of compounds.
+This example is based on [1], but some minor modifications are applied.
 
+We use [PubChem](https://pubchem.ncbi.nlm.nih.gov) as a dataset of
+chemical compounds and assay outcomes, and [Chainer](http://chainer.org)
+to build, train, and evaluate deep learning models.
 
-See doc.md for detail explanation of this example.
-
+See commentary.md for the detail explanation.
 
 # Dependency
 
-* Chainer
-* RDKit
-* NumPy
-* Pandas
-* sci-kit learn
-* Nose (for testing)
-
+* [Chainer](http://chainer.org)
+* [NumPy](http://www.numpy.org)
+* [pandas](http://pandas.pydata.org)
+* [RDKit](http://www.rdkit.org)
+* [scikit-learn](http://scikit-learn.org/stable/)
+* [nose](http://nose.readthedocs.io/en/latest/) (for testing only)
 
 # Usage
-
-We can run the code with the following command.
 
 ```
 $ PYTHONPATH="." python tools/train.py
 ```
 
-If we want to run the code with GPU, add `--gpu <GPU ID>` to the command.
-Run `python tools/trian.py --help` to see the complete list of options.
+It runs the program on CPU by default.
+If you want to run the program with GPU, add `--gpu <GPU ID>` option.
+Run `python tools/train.py --help` to see the complete list of options.
 
 Q. What is `PYTHONPATH`? Why do we need to specify it?
 
@@ -46,7 +45,6 @@ Without GPU tests
 ```
 PYTHONPATH="." nosetests -a '!gpu' tests
 ```
-
 
 ## Reference
 
