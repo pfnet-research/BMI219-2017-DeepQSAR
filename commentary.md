@@ -115,9 +115,9 @@ we set an attribute `train` that represents the mode of this Chain and switches
 the behavior accordingly.
 
 Q. Confirm that `predictor` defined above has two FC layers, `unit_num` units
-between two FC layers, and `C` output units.
+between two FC layers and `C` output units.
 
-Q. Change the architecture of predictors (e.g. the number of layers or units in the layers) and check how the final accuracy changes.
+Q. In the original paper, the authors used upto three-layer MLP. Change the predictor from two-layer to three-layer and check how the final accuracy changes. Try other architectures.
 
 ## Sigmoid function
 
