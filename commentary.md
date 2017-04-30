@@ -330,4 +330,5 @@ So, it is recommended to write tests from the most suspicious and unconfident pa
 ## Reference
 
 [1] Dahl, G. E., Jaitly, N., & Salakhutdinov, R. (2014). Multi-task neural networks for QSAR predictions. *arXiv preprint* arXiv:1406.1231.
+
 [2] Rogers, David, and Mathew Hahn. "Extended-connectivity fingerprints." Journal of chemical information and modeling 50.5 (2010): 742-754.
