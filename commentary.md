@@ -3,7 +3,7 @@
 *Quantitative Structure-Property Relationship* (QSAR in short) is a study of
 relationship between structures and biological characteristics
 (e.g. toxicity) of chemical compounds.
-Recently, Dahl et al. [1] applied deep learning to QSAR tasks and achieved
+Recently, [Dahl et al.]() applied deep learning to QSAR tasks and achieved
 better prediction accuracy.
 This work opened the door of application of Deep Learning (DL) to bioinformatics fields.
 
@@ -50,20 +50,20 @@ If you are interested in PubChem REST API, see [the official document](https://p
 
 ## Preprocessing
 
-We encode labels into ternary values.
+Assay outcomes are encoded into *ternary* (not binary) labels.
 Active and Inactive are converted as 0 and 1, respectively.
-If a compound is not found in some task, or has labels other than Active
+If a substance is not found in a task, or has labels other than Active
 or Inactive, its label corresponds to the task is set to -1 that indicates "missing".
 
-Compounds are converted into fixed-length bit vectors called *fingerprint*.
+Substances are converted into fixed-length bit vectors (2048 bit in this example) called *fingerprint*.
 There are many algorithms and softwares to encode compounds to fingerprint.
-In the original paper [1], the authors used [DRAGON](https://chm.kode-solutions.net/products_dragon.php).
-But as it is a proprietary software, we use the ECFP algorithm implemented in RDKit instead.
+In the original paper, the authors used [DRAGON](https://chm.kode-solutions.net/products_dragon.php).
+But as it is a proprietary software, we use Extended Connectivity Fingerprint (ECFP) [2], which is one of the most popular encoding methods, implemented in RDKit instead.
 
 In summary, the preprocessed dataset consists of 19 tasks, each of which
 is a pair of a list of fingerprints and a list of labels.
-In the context of machine learning, the input data fed to the model (fingerprint
-  in this context) is called *feature*, or *feature vector*.
+In the context of machine learning problems, the input information (fingerprints
+ in this example) which we extract from raw data and which represents the characteristics of the data is called a *feature vector*, or a *feature* in short.
 
 # Model
 
@@ -328,3 +328,4 @@ So, it is recommended to write tests from the most suspicious and unconfident pa
 ## Reference
 
 [1] Dahl, G. E., Jaitly, N., & Salakhutdinov, R. (2014). Multi-task neural networks for QSAR predictions. *arXiv preprint* arXiv:1406.1231.
+[2] Rogers, David, and Mathew Hahn. "Extended-connectivity fingerprints." Journal of chemical information and modeling 50.5 (2010): 742-754.
