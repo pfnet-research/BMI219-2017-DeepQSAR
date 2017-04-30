@@ -82,7 +82,7 @@ Note that computations are done in a *minibatch* manner, the output of
 the predictor will have a shape `(N, C)` where `N` is the number of samples
 in a minibatch.
 
-We realize the MLP as the subclass of `chainer.ChainList`.
+We realize the MLP as the subclass of `chainer.ChainList`:
 
 ```python
 class MLP(chainer.ChainList):
@@ -91,19 +91,24 @@ class MLP(chainer.ChainList):
         layers = [L.Linear(None, unit) for unit in units]
         super(MLP, self).__init__(*layers)
         self.train = True
+```
 
+First, it setups fully-connected(FC) layers, which are building blocks of the MLP in `__init__`.
+In Chainer, the FC layer corresponds to `L.Linear`.
+
+The forward propagation of `MLP` is defined in its `__call__` method:
+
+```
     def __call__(self, x):
         for l in self[:-1]
             x = l(x)
             x = F.relu(F.dropout(x, train=self.train))
         return self[-1](x)
+
 ```
 
-First, it setups fully-connected(FC) layers, which are building blocks of the MLP in `__init__`.
-In Chainer, the FC layer corresponds to `L.Linear`.
-And it sequentially applies them in `__call__` method.
-Dropout(`F.dropout`) and ReLu(`F.relu`) layers are inserted after each FC layer,
-except the final one.
+It sequentially applies them in `__call__` method.
+Dropout(`F.dropout`) and ReLu(`F.relu`) layers are inserted after each FC layer, except the final one.
 
 As the behavior of the Dropout is different in training and testing phases,
 we set an attribute `train` that represents the mode of this Chain and switches
