@@ -76,7 +76,7 @@ The predictor we build in this example is a 2-layered perceptron.
 predictor = mlp.MLP(unit_num, C)
 ```
 
-Here, `unit_num` is the number of units
+Here, `unit_num` is the number of units and
 `C` is the number of tasks (i.e. 19 in this example).
 Note that computations are done in a *minibatch* manner, the output of
 the predictor will have a shape `(N, C)` where `N` is the number of samples
