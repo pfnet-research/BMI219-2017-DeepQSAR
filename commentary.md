@@ -3,7 +3,7 @@
 *Quantitative Structure-Property Relationship* (QSAR in short) is a study of
 relationship between structures and biological characteristics
 (e.g. toxicity) of chemical compounds.
-Recently, [Dahl et al.]() applied deep learning to QSAR tasks and achieved
+Recently, Dahl et al. [1] applied deep learning to QSAR tasks and achieved
 better prediction accuracy.
 This work opened the door of application of Deep Learning (DL) to bioinformatics fields.
 
@@ -43,10 +43,9 @@ Substances are converted from the [SDF file format](https://en.wikipedia.org/wik
 [SMILES](https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system) with [RDKit](http://www.rdkit.org).
 As data retrieval takes long time, we get the data and store the data in [HDF5 format](https://support.hdfgroup.org/HDF5/) in advance.
 You can download it from the following URL: https://www.dropbox.com/s/g25vyeralmba4d0/pubchem.h5?raw=1
+If you are interested in PubChem REST API, see [the official document](https://pubchem.ncbi.nlm.nih.gov/pug_rest/PUG_REST.html) for the detail specification.
 
 Q. Download the dataset from the above URL and check the contents. For example, you can load HDF5 files with [`HDFStore`](http://pandas.pydata.org/pandas-docs/stable/io.html#hdf5-pytables) of Pandas.
-
-If you are interested in PubChem REST API, see [the official document](https://pubchem.ncbi.nlm.nih.gov/pug_rest/PUG_REST.html) for the detail specification.
 
 ## Preprocessing
 
@@ -69,19 +68,18 @@ In the context of machine learning problems, the input information (fingerprints
 
 ## Predictor
 
-The predictor we build in this example is a 2-layered perceptron.
+The predictor we build in this example is a 2-layered perceptron (MLP is a shorthand of *multi-layer perceptron*):
 
 ```python
 predictor = mlp.MLP(unit_num, C)
 ```
 
-Here, `unit_num` is the number of units and
-`C` is the number of tasks (i.e. 19 in this example).
-Note that computations are done in a *minibatch* manner, the output of
-the predictor will have a shape `(N, C)` where `N` is the number of samples
+Here, `unit_num` is the number of units and `C` is the number of tasks (i.e. 19 in this example).
+Note that as computations are done in a *minibatch* manner, the output of
+the predictor has a shape `(N, C)` where `N` is the number of samples
 in a minibatch.
 
-We realize the MLP as the subclass of `chainer.ChainList`:
+We realize the MLP as the subclass of [`chainer.ChainList`](http://docs.chainer.org/en/stable/reference/core/link.html#chainer.ChainList):
 
 ```python
 class MLP(chainer.ChainList):
@@ -92,8 +90,9 @@ class MLP(chainer.ChainList):
         self.train = True
 ```
 
-First, it setups fully-connected(FC) layers, which are building blocks of the MLP in `__init__`.
-In Chainer, the FC layer corresponds to `L.Linear`.
+In `__init__` method, it sets up fully-connected (FC) layers, which are building blocks of the MLP.
+Chainer prepares the FC layer as [`L.Linear`](http://docs.chainer.org/en/stable/reference/links.html#chainer.links.Linear).
+In this example (and also in the document of Chainer), we use `L` as the abbreviation of `chainer.links`.
 
 The forward propagation of `MLP` is defined in its `__call__` method:
 
@@ -107,21 +106,24 @@ The forward propagation of `MLP` is defined in its `__call__` method:
 ```
 
 It sequentially applies them in `__call__` method.
-Dropout(`F.dropout`) and ReLu(`F.relu`) layers are inserted after each FC layer, except the final one.
+Dropout ([`F.dropout`](http://docs.chainer.org/en/stable/reference/functions.html#chainer.functions.dropout)) and ReLu ([`F.relu`](http://docs.chainer.org/en/stable/reference/functions.html#chainer.functions.relu)) layers are inserted after each FC layer, except the final one.
+Similarly to `L`, `F` is an alias of `chainer.functions`.
 
-As the behavior of the Dropout is different in training and testing phases,
-we set an attribute `train` that represents the mode of this Chain and switches
+As the behavior of Dropout is different in training and testing phases,
+we set an attribute `train` that represents the mode of the MLP and switches
 the behavior accordingly.
 
 Q. Confirm that `predictor` defined above has two FC layers, `unit_num` units
 between two FC layers and `C` output units.
 
-Q. In the original paper, the authors used upto three-layer MLP. Change the predictor from two-layer to three-layer and check how the final accuracy changes. Try other architectures.
+Q. In the original paper, the authors used the MLP consists of up to three FC layers. Change the predictor from two-layer to three-layer and check how the final accuracy changes. Try other architectures.
+
+Q. Why we should not add Dropout and ReLu to the final FC layer? See what happens if we do that.
 
 ## Sigmoid function
 
-As we want the predictor to output the probability of being active (or inactive)
-given the input feature, its output should be between 0 and 1.
+We want the predictor to output the probability of being active
+given the input feature. Therefore, its output should be between 0 and 1.
 *Sigmoid function* is suitable for this purpose. It is defined as
 
 ```
@@ -129,27 +131,26 @@ sigmoid(x) = 1 / (1 + exp(-x)),
 ```
 
 where `x` is a scalar float value.
-
-Q. Draw the graph of the sigmoid function and verify that it is a monotonically
-increasing function whose range is `(0, 1)`.
-
 When we apply the sigmoid function to a tensor, or multi-dimensional array,
 it is common to apply the scalar function in element-wise manner.
+
+Q. Draw a graph of the sigmoid function and verify that it is a monotonically
+increasing function whose range is `(0, 1)`.
 
 ## Cross entropy loss
 
 We train the predictor by minimizing some predefined loss values.
 As target labels are binary, it is common to use
-the *cross entropy* loss defined as
+a *cross entropy loss* defined as
 
 ```
 cross_entropy(p, t) = \sum_{i=1}^N y_i \log p_i + (1 - y_i) \log (1 - p_i),
 ```
 
-where `p` and `t` is a 1-dimensional array of length `N` whose
+where `p` and `t` is a 1-dimensional array of length `N` (or a minibatch) whose
 `i`-th value represent the predicted probability of being active
-and the ground truth label for `i`-th sample.
-As this is multitask learning of `C` tasks, the actual `p` and `t` have shape of `(N, C)`.
+and the ground truth label for `i`-th sample, respectively.
+As it is a multitask learning of `C` tasks, the actual `p` and `t` have shapes of `(N, C)`.
 We compute the cross entropy loss for each task and sum them up to get the final loss.
 
 The loss value is calculated by wrapping the predictor with `Classifier`.
@@ -158,7 +159,8 @@ The loss value is calculated by wrapping the predictor with `Classifier`.
 classifier = classifier.Classifier(predictor=predictor)
 ```
 
-What it does is simply to calculate loss value and to report it for this minibatch.
+`Classifier` is a subclass of `Chain`.
+What it does is simply to take a minibatch, calculate a loss value, and report it:
 
 ```python
 class Classifier(chainer.Chain):
@@ -174,7 +176,7 @@ class Classifier(chainer.Chain):
 
 For numerically stable computation, it is common to combine
 the sigmoid function with the following cross entropy.
-Chainer implement this functionality in `F.sigmoid_cross_entorpy`.
+Chainer implements this functionality as [`F.sigmoid_cross_entorpy`](http://docs.chainer.org/en/stable/reference/functions.html#chainer.functions.sigmoid_cross_entropy).
 
 
 # Evaluation
