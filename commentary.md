@@ -168,15 +168,15 @@ class Classifier(chainer.Chain):
     def __call__(self, *args):
         x, t = args
         y = self.predictor(x)
-
         loss = F.sigmoid_cross_entropy(y, t)
         reporter.report({'loss': loss}, self)
         return loss
 ```
 
-For numerically stable computation, it is common to combine
+You may notice that we use [`F.sigmoid_cross_entorpy`](http://docs.chainer.org/en/stable/reference/functions.html#chainer.functions.sigmoid_cross_entropy)
+in `__call__` instead of applying the singmoid and cross entropy functions separately.
+It is commmon in most deep learning frameworks to combine them if possible for numerically stable computation.
 the sigmoid function with the following cross entropy.
-Chainer implements this functionality as [`F.sigmoid_cross_entorpy`](http://docs.chainer.org/en/stable/reference/functions.html#chainer.functions.sigmoid_cross_entropy).
 
 
 # Evaluation
