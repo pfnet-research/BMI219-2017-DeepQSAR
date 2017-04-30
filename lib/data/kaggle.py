@@ -69,7 +69,7 @@ def creator(cache_path):
 
 
 def loader(cache_path):
-    global task_name
+    global task_names
     assays, smiles, task_names = _load(cache_path)
     return create_dataset(assays, smiles, smiles2fp)
 
