@@ -8,7 +8,7 @@ better prediction accuracy.
 This work opened the door of application of Deep Learning (DL) to bioinformatics fields.
 
 We follow the experiment of [1], with small modifications because of some technical issues.
-In this example, we will learn
+In this example, we will learn:
 
 * how to prepare training/testing datasets for the task with PubChem dataset.
 * how to build, train, and evaluate DL model with Chainer.
@@ -17,37 +17,36 @@ In this example, we will learn
 # Dataset creation
 
 Dataset creation is implemented in `tools/kaggle.py`.
-We will describe the procedure of this function in this section.
+We describe the procedure of this function in this section.
 
 ## Retrieval
 
 The dataset we use in this example is same as [1].
-We select 15 assays in the PubChem dataset and create one task per one assay,
+We select 15 assays from the PubChem dataset and create one task per one assay,
 except assay ID (AID) 1851, from which we create 5 tasks.
-So, the dataset consists of 19 tasks in total.
+Therefore, the dataset consists of 19 tasks in total.
 
-Each task consists of a pair of chemical compounds and assay outcomes.
-In one assay, each compound has one of five labels that represents the outcome for the substance (Probe, Active, Inactive, Inconclusive, or Untested).
-For each task, we filter out compounds that has labels other than Active and Inactive.
-Assay no. 1851 contains five independent assays to the same set of compounds.
-We separate and treat them as five independent tasks.
+Each substance in an assay has one of five labels (Probe, Active, Inactive, Inconclusive, or Untested)
+that represents the outcome for the substance.
+For each assay, we filter out compounds that has labels other than Active and Inactive and creates a task
+that consists of a pair of chemical compounds and assay outcomes.
+AID 1851 conducted five independent assays to the same set of substances.
+We separate and treat them as five independent tasks, and applied same filtering to them.
 
-As one compound can occur in several tasks.
-We have to identify substances in different tasks.
-PubChem assigns two types of IDs, namely, compound ID (CID) and substance ID (SID) to compounds.
-We use SID to identify them and 56326 compounds have either Active or Inactive
-label in at least one tasks.
-We retrieve the chemical structure of compounds in [SDF file format](https://en.wikipedia.org/wiki/Chemical_table_file#SDF) and convert
-it to [SMILES](https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system).
-with [RDKit](http://www.rdkit.org).
+As one substance can occur in several tasks, we have to identify substances in different tasks.
+PubChem assigns two types of IDs, namely, compound ID (CID) and substance ID (SID) to substances.
+We use SID to identify them.
+56326 compounds have either Active or Inactive label in at least one tasks.
 
-Pubchem has a REST API for retrieving its dataset.
-But as data retrieval through the REST API takes long time,
-we retrieved the dataset in advance and store the data in [HDF5 format](https://support.hdfgroup.org/HDF5/).
-If you want to check the raw dataset. You can download it from
-[here](https://www.dropbox.com/s/g25vyeralmba4d0/pubchem.h5?raw=1).
-If you are interested in PubChem REST API, see [the official document](https://pubchem.ncbi.nlm.nih.gov/pug_rest/PUG_REST.html)
- for the detail specification.
+Assay outcomes and chemical structure of substances are retrieved via the PubChem REST API.
+Substances are converted from the [SDF file format](https://en.wikipedia.org/wiki/Chemical_table_file#SDF) to
+[SMILES](https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system) with [RDKit](http://www.rdkit.org).
+As data retrieval takes long time, we get the data and store the data in [HDF5 format](https://support.hdfgroup.org/HDF5/) in advance.
+You can download it from the following URL: https://www.dropbox.com/s/g25vyeralmba4d0/pubchem.h5?raw=1
+
+Q. Download the dataset from the above URL and check the contents. For example, you can load HDF5 files with [`HDFStore`](http://pandas.pydata.org/pandas-docs/stable/io.html#hdf5-pytables) of Pandas.
+
+If you are interested in PubChem REST API, see [the official document](https://pubchem.ncbi.nlm.nih.gov/pug_rest/PUG_REST.html) for the detail specification.
 
 ## Preprocessing
 
