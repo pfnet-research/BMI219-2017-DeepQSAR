@@ -92,7 +92,6 @@ class MLP(chainer.ChainList):
     def __init__(self, *out_units):
         layers = [L.Linear(None, unit) for unit in out_units]
         super(MLP, self).__init__(*layers)
-        self.train = True
 ```
 
 In `__init__` method, it sets up fully-connected (FC) layers, which are building blocks of the MLP.
