@@ -31,6 +31,7 @@ def create_dataset(assays, smiles, featurizer):
 
     # Convert smiles to fingerprint and drop substances
     # that cannot be converted to fingerprint.
+    print('Creating feature vectors from SMILEs...')
     df['FINGERPRINT'] = df['SMILES'].apply(featurizer)
     df = df[df['FINGERPRINT'] != -1]
     fps = np.array(list(df['FINGERPRINT'].values), dtype=np.float32)
