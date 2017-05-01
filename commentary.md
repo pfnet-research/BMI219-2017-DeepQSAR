@@ -183,12 +183,12 @@ the sigmoid function with the following cross entropy.
 
 ## Extension
 
-Trainers are augmented by extending them with *Extension* in Chainer.
+Trainers are augmented with *Extensions* in Chainer.
 We can make an extension by either decorating a function with
 `chainer.training.make_extension` decorator
 or inheriting `chainer.training.Extension` class.
 
-This example uses this extension mechanism to:
+This example uses the extension mechanism to:
 
 * evaluate predictor (explained later).
 * take snapshot of training process.
@@ -198,14 +198,13 @@ This example uses this extension mechanism to:
 
 ## Accuracy evaluation
 
-There are several way to evaluate correctness of models.
-We use three metrics in this example, namely, accuracy, loss values, and AUC.
-
+There are several ways to evaluate correctness of predictors.
+We use three metrics in this example, namely, *accuracy*, *loss value*, and *AUC*.
 As their implementations are similar, we only look at how the accuracy is computed in detail
 and left the other two for readers.
 `AccuracyEvaluator` is, as the name indicates, responsible for this task.
 
-The essential part of `AccuracyEvaluator` is in the `evaluate` method.
+The essential part of `AccuracyEvaluator` is in the `evaluate` method:
 
 ```python
     def evaluate(self, iterator):
@@ -221,12 +220,14 @@ The essential part of `AccuracyEvaluator` is in the `evaluate` method.
 ```
 
 Here, `iterator` runs through either the training or the testing dataset.
-The extension repeatedly extracts a minibatch from the iterator, counts the number of correct samples and the support (i.e. the number of samples that has either activate and inactivate labels) for the minibatch, and accumulates them to intermediate variables.
+The extension repeatedly extracts a minibatch from the iterator, counts the number of correct samples and the support (i.e. the number of samples that has either activate and inactivate labels) for the minibatch in `_evaluate_one` method, and accumulates them to intermediate variables.
 After consuming all minibatches, the accuracy is computed with these two variables.
+Note that this extension calculates accuracies for each tasks.
+So, `correct`, `support`, and `accuracy` are 1-dimensional ndarray that has as many elememnts as tasks.
 
 We insert extensions with `Trainer.extend` method.
 The metrics are computed for both training and validation dataset
-to watch the model does not overfit nor underfit.
+to watch the model does not overfit nor underfit:
 
 ```python
 trainer.extend(accuracy.AccuracyEvaluator(
@@ -234,18 +235,30 @@ trainer.extend(accuracy.AccuracyEvaluator(
     classifier, device=args.gpu))
 ```
 
+Q. Check `AcuracyEvaluator` and `LossEvaluator` how corresponding metrics are evaluated.
+
 Q. Implement an extension `PrecisionEvaluator` that computes precision for training and test dataset.
 
 
 # Unit test
 
-In this section, we briefly explain a software engineering aspect of machine learning.
 Once you implement a function, you need to verify that it works correctly.
 *Unit test* is a common way of testing functions.
+Different from the previous sections, we briefly explain a software engineering aspect of machine learning in this section.
 
-## Testing count function
+We use [nose](http://nose.readthedocs.io/) for unit testing.
+nose can be installed via `pip` command:
 
-Let's take `lib.evaluations.count` for example:
+```bash
+$ pip install nose
+```
+
+We just explain the simplest example of unit testing here.
+See the official document of `nose` for the detail.
+
+## Example: count function
+
+Let's take `lib.evaluations.count` function for example:
 
 ```python
 def count(y, t):
@@ -259,18 +272,21 @@ def count(y, t):
 
 This function takes `y`, which is supposed to be the output
 of the predictor (before applying the sigmoid function) and target labels `t`.
-Both are represented as 2-dimensional arrays (either NumPy or CuPy `ndarray`)
+Both are represented as 2-dimensional arrays of either NumPy or CuPy `ndarray`
 whose shape is `(N, C)` where `N` is a number of samples in a minibatch
 and `C` is a number of tasks.
 
 It counts the number of samples whose label is correctly predicted (`correct`)
-and that are not ignored (`support`) for each task.
+and the number of non-ignored samples (`support`) for each task.
 The predicted value is the sign of `y`.
 `t` usually take either `0` or `1`, which represent active and inactive,
 respectively, but `i`-th sample is *ignored* in `j`-th task if `t[i, j] == -1`.
 
-Here is a test code that checks the behavior of this function.
-All tests are located in `tests` directory.
+
+## Testcode of count function
+
+Here is a test code that checks the behavior of `count` function.
+All tests are located in `tests` directory and this unit test is in `tests/test_accuracy.py`.
 
 ```python
 class TestCount(unittest.TestCase):
@@ -286,46 +302,83 @@ class TestCount(unittest.TestCase):
 ```
 
 It creates sample inputs (`y` and `t`),
-feeds the input to the function tested, and compares the output
+feeds the input to the function to be tested, and compares the output
 with expected one.
+`np.testing.assert_array_equals` compares thow NumPy ndarrays
+and raises error if they does not agree within specified precision.
+
+
+# Run the test code
+
+To run the test with `nose`, type the following command in a terminal:
+
+```
+$ nosetests tests/test_accuracy.py
+```
+
+It runs all tests in the file (see [the document](http://nose.readthedocs.io/en/latest/writing_tests.html#writing-tests)
+if you are interested in )
+You will get the result something like this if all tests pass:
+
+```
+$ nosetests tests/test_accuracy.py                                            
+......
+----------------------------------------------------------------------
+Ran 6 tests in 6.010s
+
+OK
+```
+
+If your environment does not support GPU, add `-a '!gpu'` to the command.
+See [the corresponding part](http://nose.readthedocs.io/en/latest/plugins/attrib.html#module-nose.plugins.attrib) of the nose document for detail.
+ 
+
+Q. `count` assumes that `y` is a 2-dimensional float array. But we cannot guarantee that users
+always feed valid inputs. We need to check if inputs are expected one. Change `count` method so that it raises [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) when `y` does not meet the condition above and write a test case that checks this input validation works correctly (Hint: you can use [`unittest.assertRaises`](https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertRaises) to check the function raises an expected error).
+
+
+## Corner case
 
 It is preferable that unit tests can support *corner case* (a.k.a. *edge case*), or
 a situation that does not occur in normal operation.
 
-Q. One of corner cases is that all elements in `t` being `-1`,
-i.e. all samples are ignored by all tasks. In such a case, we cannot calculate accuracy
-because support is 0. We define the specification of this function as returning `np.inf`
-when all samples are ignored. Write a test case that checks this behavior. You might need
-to modify `count` method.
-
-Q. `count` assumes that `y` is a 2-dimensional float array. But we cannot guarantee that users
-always feed valid inputs. Write a check check We need to check if the input is expected one. Change `count` method so that it raises `ValueError` when `y` does not meet the condition above and write a test case that checks this input validation works correctly.
+Q.  One of corner cases the `count` method has is that all values in a column of `t` are `-1`,
+that is, all samples are ignored by some task.
+In such a case, we cannot calculate accuracy because support is 0, causing division-by-zero.
+We determine that if all samples are ignored by some task, the function should return `numpy.inf` as the accuracy for the task 
+Write a test case that checks this behavior. You might need to modify `count` method.
 
 Q. What other corner cases does this function has?
 
 Q. Write a unit test that checks that `PrecisionEvaluator` (implenented in the former question) correctly calculates precision.
 
 
-## Benefit and practical consideration of unit tests.
+## Benefit of unit tests 
 
-Unit tests are useful for debugging codes.
-One of the most easiest way to debug codes is to run them and debug-print
-intermediate outputs.
-But as the codes grow, it is getting harder to find bugs solely with this
-technique.
+One of the benefit of writing unit tests is its usefulness for debugging.
+You may often run codes and debug-print intermediate outputs to debug them.
+Although it is easy and powerful, it is getting harder to find bugs solely with this
+technique as the codes grow.
 You can verify the behavior of functions (although not perfectly)
 and narrow down where bugs reside by writing unit tests for suspicious functions.
 
+Unit tests are also beneficial to keep your codes clean and tidy.
 You will find as you write unit tests that
 it is difficult to write unit tests for huge and monolithic functions.
-You will also notice that you cannot write test codes unless you clearly determine
-the specification of the target functions.
-Unit tests are sometimes beneficial to keep your codes clean and clear.
+Also you may notice that you cannot write test codes unless you clearly determine
+the behavior of the target functions.
+If we want to write unit tests appropriately, functions tend to be small and have clear-cut specification.
 That is another positive side effect of unit testing.
+
+
+# Practical consideration
 
 In practice, however, it is rarely possible to write unit tests for all functionalities
 of all functions in experimental codes.
-So, it is recommended to write tests from the most suspicious and unconfident part.
+This is because contrary to library codes, codes for experiments are subject to change because
+of many trial & errors.
+So, it is recommended to write tests from the most suspicious and unconfident part if your coding time is limited.
+
 
 ## Reference
 
