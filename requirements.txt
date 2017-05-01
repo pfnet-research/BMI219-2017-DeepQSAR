@@ -1,4 +1,6 @@
 chainer
 nose
 numpy
+pandas
+rdkit
 scikit-learn
