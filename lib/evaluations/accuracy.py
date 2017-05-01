@@ -26,12 +26,12 @@ class AccuracyEvaluator(B.BaseEvaluator):
     def evaluate(self, iterator):
         iterator.reset()
 
-        correct, support = None, None
+        correct, support = 0., 0.
         for batch in iterator:
             in_arrays = self.converter(batch, self.device)
             correct_, support_ = self._evaluate_one(*in_arrays)
-            correct = correct_ if correct is None else correct + correct_
-            support = support_ if support is None else support + support_
+            correct = correct + correct_
+            support = support + support_
         accuracy = correct.astype(np.float32) / support
 
         result = dict([('accuracy_%d' % i, acc)
