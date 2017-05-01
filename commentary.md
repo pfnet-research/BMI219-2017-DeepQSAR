@@ -102,6 +102,10 @@ The forward propagation of `MLP` is defined in its `__call__` method:
 
 ```python
 # lib/models/mlp.py
+class MLP(chainer.ChainList):
+
+    # (Omitted)
+
     def __call__(self, x):
         for l in self[:-1]
             x = F.relu(l(x))
@@ -220,6 +224,11 @@ The essential part of `AccuracyEvaluator` is in the `evaluate` method:
 
 ```python
 # lib/evaluations/accuracy.py
+
+class AccuracyEvaluator(B.Evaluator):
+
+    # (Omitted)
+
     def evaluate(self, iterator):
         # (Omitted)
         correct, support = 0., 0.
