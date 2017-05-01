@@ -15,10 +15,10 @@ task_names = None
 data_url = 'https://www.dropbox.com/s/g25vyeralmba4d0/pubchem.h5?raw=1'
 
 
-def smiles2fp(smiles, radius=2):
+def smiles2fp(smiles, radius=6, n_bits=4096):
     mol = Chem.MolFromSmiles(smiles)
     try:
-        return desc.GetMorganFingerprintAsBitVect(mol, radius)
+        return desc.GetMorganFingerprintAsBitVect(mol, radius, n_bits)
     except Exception as e:
         print(e)
         return -1
