@@ -73,6 +73,7 @@ In the context of machine learning problems, the input information (fingerprints
 The predictor we build in this example is a 2-layered perceptron (MLP is a shorthand of *multi-layer perceptron*):
 
 ```python
+# tools/train.py
 predictor = mlp.MLP(unit_num, C)
 ```
 
