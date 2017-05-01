@@ -73,7 +73,7 @@ In the context of machine learning problems, the input information (fingerprints
 The predictor we build in this example is a 2-layered perceptron (MLP is a shorthand of *multi-layer perceptron*):
 
 ```python
-# in tools/train.py
+# tools/train.py
 predictor = mlp.MLP(unit_num, C)
 ```
 
@@ -85,7 +85,7 @@ in a minibatch.
 We realize the MLP as the subclass of [`chainer.ChainList`](http://docs.chainer.org/en/stable/reference/core/link.html#chainer.ChainList):
 
 ```python
-# in lib/models/mlp.py
+# lib/models/mlp.py
 class MLP(chainer.ChainList):
 
     def __init__(self, *units):
@@ -101,7 +101,7 @@ In this example (and also in the document of Chainer), we use `L` as the abbrevi
 The forward propagation of `MLP` is defined in its `__call__` method:
 
 ```python
-# in lib/models/mlp.py
+# lib/models/mlp.py
     def __call__(self, x):
         for l in self[:-1]
             x = F.relu(l(x))
@@ -115,7 +115,7 @@ Note that in the original paper, authors applies Dropout after FC layers. But we
 Q. Confirm that `predictor` defined above has two FC layers, `unit_num` units
 between two FC layers and `C` output units.
 
-Q. In the original paper, the authors used the MLP consists of up to three FC layers. Change the predictor from two-layer to three-layer and check how the final accuracy changes. Try other architectures.
+Q. In the original paper, the authors used the MLP consists of up to three FC layers. Change the predictor from two-layer to three-layer and check how the final accuracy changes. Try architectures other than MLP.
 
 Q. Why we should not add ReLu to the final FC layer? See what happens if we do that.
 
@@ -128,6 +128,7 @@ We introduce Drop by following these steps:
 4. After the forward propagation. Set the `train` attribute to `True` again.
 
 Hint: [`TestModeEvaluator`](https://github.com/pfnet/chainer/blob/master/examples/imagenet/train_imagenet.py#L68) in the official ImageNet example could be helpful.
+
 
 ## Sigmoid function
 
@@ -165,7 +166,7 @@ We compute the cross entropy loss for each task and sum them up to get the final
 The loss value is calculated by wrapping the predictor with `Classifier`.
 
 ```python
-# in tools/train.py
+# tools/train.py
 classifier = classifier.Classifier(predictor=predictor)
 ```
 
@@ -173,7 +174,7 @@ classifier = classifier.Classifier(predictor=predictor)
 What it does is simply to take a minibatch, calculate a loss value, and report it:
 
 ```python
-# in lib/models/classifier.py
+# lib/models/classifier.py
 class Classifier(chainer.Chain):
 
     def __call__(self, *args):
@@ -218,7 +219,7 @@ and left the other two for readers.
 The essential part of `AccuracyEvaluator` is in the `evaluate` method:
 
 ```python
-# in lib/evaluations/accuracy.py
+# lib/evaluations/accuracy.py
     def evaluate(self, iterator):
         # (Omitted)
         correct, support = 0., 0.
@@ -242,7 +243,7 @@ The metrics are computed for both training and validation dataset
 to watch the model does not overfit nor underfit:
 
 ```python
-# in tools/train.py
+# tools/train.py
 trainer.extend(accuracy.AccuracyEvaluator(
     {'train': train_iter_no_rep, 'validation': val_iter},
     classifier, device=args.gpu))
@@ -274,7 +275,7 @@ See the official document of `nose` for the detail.
 Let's take `lib.evaluations.count` function for example:
 
 ```python
-# in lib/evaluations/accuracy.py
+# lib/evaluations/accuracy.py
 def count(y, t):
     xp = cuda.get_array_module((y, t))
     mask = t != -1
@@ -303,7 +304,7 @@ Here is a test code that checks the behavior of `count` function.
 All tests are located in `tests` directory and this unit test is in `tests/test_accuracy.py`.
 
 ```python
-# in tests/test_accuracy.py
+# tests/test_accuracy.py
 class TestCount(unittest.TestCase):
 
     def test_support(self):
