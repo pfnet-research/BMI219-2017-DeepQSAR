@@ -42,10 +42,12 @@ Assay outcomes and chemical structure of substances are retrieved via the PubChe
 Substances are converted from the [SDF file format](https://en.wikipedia.org/wiki/Chemical_table_file#SDF) to
 [SMILES](https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system) with [RDKit](http://www.rdkit.org).
 As data retrieval takes long time, we get the data and store the data in [HDF5 format](https://support.hdfgroup.org/HDF5/) in advance.
-You can download it from the following URL: https://www.dropbox.com/s/g25vyeralmba4d0/pubchem.h5?raw=1
 If you are interested in PubChem REST API, see [the official document](https://pubchem.ncbi.nlm.nih.gov/pug_rest/PUG_REST.html) for the detail specification.
 
-Q. Download the dataset from the above URL and check the contents. For example, you can load HDF5 files with [`HDFStore`](http://pandas.pydata.org/pandas-docs/stable/io.html#hdf5-pytables) of Pandas.
+Q. Download the dataset from the URL below and check the contents. For example, you can load HDF5 files with [`HDFStore`](http://pandas.pydata.org/pandas-docs/stable/io.html#hdf5-pytables) of Pandas.
+
+* Dataset URL: https://www.dropbox.com/s/g25vyeralmba4d0/pubchem.h5?raw=1
+
 
 ## Preprocessing
 
