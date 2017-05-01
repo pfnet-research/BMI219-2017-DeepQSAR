@@ -105,9 +105,8 @@ The forward propagation of `MLP` is defined in its `__call__` method:
         return self[-1](x)
 ```
 
-It sequentially applies them in `__call__` method.
-ReLu ([`F.relu`](http://docs.chainer.org/en/stable/reference/functions.html#chainer.functions.relu)) layers are inserted after each FC layer, except the final one.
-Similarly to `L`, `F` is an alias of `chainer.functions`.
+It sequentially applies layers defined above.
+ReLu ([`F.relu`](http://docs.chainer.org/en/stable/reference/functions.html#chainer.functions.relu)) layers are inserted after each FC layer, except the final one (Similarly to `L`, `F` is an alias of `chainer.functions`).
 Note that in the original paper, authors applies Dropout after FC layers. But we do not use it and left it to readers. 
 
 Q. Confirm that `predictor` defined above has two FC layers, `unit_num` units
