@@ -83,4 +83,4 @@ def get_kaggle():
 
     dataset = download.cache_or_load_file(cache_path, creator, loader)
     N = len(dataset)
-    return D.split_dataset_random(dataset, int(N * 0.8))
+    return D.split_dataset_random(dataset, int(N * 0.75))
