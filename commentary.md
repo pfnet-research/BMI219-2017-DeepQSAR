@@ -117,12 +117,12 @@ Q. In the original paper, the authors used the MLP consists of up to three FC la
 
 Q. Why we should not add ReLu to the final FC layer? See what happens if we do that.
 
-Q. In this question, we add Dropout between FC layers and ReLU layers. Be aware that the behavior of Dropout is different during training and testing phases. So, we have to change the behavior of the predictor accordingly. 
+Q. In this question, we add Dropout between FC layers and ReLU layers. Be aware that the behavior of Dropout is different during training and test phases. So, we have to change the behavior of the model accordingly. 
 We introduce Drop by following these steps:
 
 1. Insert Dropout in the forward propagation implemented in `Model.__call__`. Dropout is implemented as [`F.dropout`](http://docs.chainer.org/en/stable/reference/functions.html#chainer.functions.dropout) in Chainer.
 2. Add `train` attribute to `Model`. That specifies the mode of the model.
-3. Each `Evaluator` (explained later) extracts the model to evaluate it during test phase (e.g. see [here](https://github.com/delta2323/BMI219-2017-DeepQSAR/blob/master/lib/evaluations/accuracy.py#L43)). We should set the `train` attribute of the model to `False` temporaliry.
+3. Each `Evaluator` (explained later) extracts the model to evaluate it during test phase (e.g. see [here](https://github.com/delta2323/BMI219-2017-DeepQSAR/blob/master/lib/evaluations/accuracy.py#L43), `predictor` is a instance of `Model`). We should set the `train` attribute of the model to `False` temporaliry.
 4. After the forward propagation. Set the `train` attribute to `True` again.
 
 Hint: [`TestModeEvaluator`](https://github.com/pfnet/chainer/blob/master/examples/imagenet/train_imagenet.py#L68) in the official ImageNet example could be helpful.
