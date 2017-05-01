@@ -70,7 +70,8 @@ In the context of machine learning problems, the input information (fingerprints
 
 ## Predictor
 
-The predictor we build in this example is a 2-layered perceptron (MLP is a shorthand of *multi-layer perceptron*):
+The predictor we build in this example is a 2-layered perceptron (
+is a shorthand of *multi-layer perceptron*):
 
 ```python
 # tools/train.py
@@ -88,8 +89,8 @@ We realize the MLP as the subclass of [`chainer.ChainList`](http://docs.chainer.
 # lib/models/mlp.py
 class MLP(chainer.ChainList):
 
-    def __init__(self, *units):
-        layers = [L.Linear(None, unit) for unit in units]
+    def __init__(self, *out_units):
+        layers = [L.Linear(None, unit) for unit in out_units]
         super(MLP, self).__init__(*layers)
         self.train = True
 ```
