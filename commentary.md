@@ -98,13 +98,12 @@ In this example (and also in the document of Chainer), we use `L` as the abbrevi
 
 The forward propagation of `MLP` is defined in its `__call__` method:
 
-```
+```python
     def __call__(self, x):
         for l in self[:-1]
             x = l(x)
             x = F.relu(F.dropout(x, train=self.train))
         return self[-1](x)
-
 ```
 
 It sequentially applies them in `__call__` method.
