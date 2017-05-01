@@ -48,7 +48,7 @@ if args.gpu >= 0:
     cuda.get_device(args.gpu).use()
     classifier.to_gpu()
 
-optimizer = O.Adam()
+optimizer = O.MomentumSGD(lr=0.01, momentum=0.95)
 optimizer.setup(classifier)
 
 updater = training.StandardUpdater(train_iter, optimizer, device=args.gpu)
