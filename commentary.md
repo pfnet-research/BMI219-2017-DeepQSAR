@@ -308,7 +308,7 @@ with expected one.
 and raises error if they does not agree within specified precision.
 
 
-# Run the test code
+## Run the test code
 
 To run the test with `nose`, type the following command in a terminal:
 
@@ -371,7 +371,7 @@ If we want to write unit tests appropriately, functions tend to be small and hav
 That is another positive side effect of unit testing.
 
 
-# Practical consideration
+## Practical consideration
 
 In practice, however, it is rarely possible to write unit tests for all functionalities
 of all functions in experimental codes.
