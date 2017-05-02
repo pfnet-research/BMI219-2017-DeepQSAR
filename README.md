@@ -17,6 +17,7 @@ See `commentary.md` for the detail explanation.
 * [pandas](http://pandas.pydata.org)
 * [RDKit](http://www.rdkit.org)
 * [scikit-learn](http://scikit-learn.org/stable/)
+* [six](https://pypi.python.org/pypi/six)
 * [nose](http://nose.readthedocs.io/en/latest/) (for testing only)
 
 # Usage
