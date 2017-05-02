@@ -1,17 +1,17 @@
 # Introduction
 
-*Quantitative Structure-Property Relationship* (QSAR in short) is a study of
-relationship between structures and biological characteristics
+*Quantitative Structure-Property Relationship* (QSAR in short) is the study of
+the relationship between structures and biological characteristics
 (e.g. toxicity) of chemical compounds.
 Recently, Dahl et al. [1] applied deep learning to QSAR tasks and achieved
 better prediction accuracy.
-This work opened the door of application of Deep Learning (DL) to bioinformatics fields.
+This work opened the door to the application of Deep Learning (DL) in bioinformatics fields.
 
 We follow the experiment of [1], with small modifications because of some technical issues.
 In this example, we will learn:
 
 * how to prepare training/testing datasets for the task with PubChem dataset.
-* how to build, train, and evaluate DL model with Chainer.
+* how to build, train, and evaluate a DL model with Chainer.
 * how to test your code with unit tests.
 
 # Dataset creation
@@ -22,27 +22,27 @@ We describe the procedure of this function in this section.
 ## Retrieval
 
 The dataset we use in this example is same as [1].
-We select 15 assays from the PubChem dataset and create one task per one assay,
+We select 15 assays from the PubChem dataset and create one task for each assay,
 except assay ID (AID) 1851, from which we create 5 tasks.
 Therefore, the dataset consists of 19 tasks in total.
 
 Each substance in an assay has one of five labels (Probe, Active, Inactive, Inconclusive, or Untested)
 that represents the outcome for the substance.
-For each assay, we filter out compounds that has labels other than Active and Inactive and creates a task
+For each assay, we filter out compounds that have labels other than Active and Inactive and creates a task
 that consists of a pair of chemical compounds and assay outcomes.
 AID 1851 conducted five independent assays to the same set of substances.
-We separate and treat them as five independent tasks, and applied same filtering to them.
+We separate and treat them as five independent tasks, and applied the same filtering to them.
 
 As one substance can occur in several tasks, we have to identify substances in different tasks.
 PubChem assigns two types of IDs, namely, compound ID (CID) and substance ID (SID) to substances.
 We use SID to identify them.
 56326 compounds have either Active or Inactive label in at least one tasks.
 
-Assay outcomes and chemical structure of substances are retrieved via the PubChem REST API.
+The assay outcomes and chemical structure of substances are retrieved via the PubChem REST API.
 Substances are converted from the [SDF file format](https://en.wikipedia.org/wiki/Chemical_table_file#SDF) to
 [SMILES](https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system) with [RDKit](http://www.rdkit.org).
-As data retrieval takes long time, we get the data and store the data in [HDF5 format](https://support.hdfgroup.org/HDF5/) in advance.
-If you are interested in PubChem REST API, see [the official document](https://pubchem.ncbi.nlm.nih.gov/pug_rest/PUG_REST.html) for the detail specification.
+As data retrieval takes a long time, we get and store the data in [HDF5 format](https://support.hdfgroup.org/HDF5/) in advance.
+If you are interested in PubChem REST API, see [the official document](https://pubchem.ncbi.nlm.nih.gov/pug_rest/PUG_REST.html) for the detailed specification.
 
 Q. Download the dataset from the URL below and check the contents. For example, you can load HDF5 files with [`HDFStore`](http://pandas.pydata.org/pandas-docs/stable/io.html#hdf5-pytables) of Pandas.
 
@@ -54,12 +54,12 @@ Q. Download the dataset from the URL below and check the contents. For example, 
 Assay outcomes are encoded into *ternary* (not binary) labels.
 Active and Inactive are converted as 0 and 1, respectively.
 If a substance is not found in a task, or has labels other than Active
-or Inactive, its label corresponds to the task is set to -1 that indicates "missing".
+or Inactive, its task label is set to -1 which indicates "missing".
 
 Substances are converted into fixed-length bit vectors (2048 bit in this example) called *fingerprint*.
-There are many algorithms and softwares to encode compounds to fingerprint.
+There are many algorithms and software implementations to encode compounds to fingerprints.
 In the original paper, the authors used [DRAGON](https://chm.kode-solutions.net/products_dragon.php).
-But as it is a proprietary software, we use Extended Connectivity Fingerprint (ECFP) [2], which is one of the most popular encoding methods, implemented in RDKit instead.
+However, since it is proprietary software, we use Extended Connectivity Fingerprint (ECFP) [2], which is one of the most popular encoding methods, implemented in RDKit instead.
 
 In summary, the preprocessed dataset consists of 19 tasks, each of which
 is a pair of a list of fingerprints and a list of labels.
@@ -114,14 +114,14 @@ class MLP(chainer.ChainList):
 
 It sequentially applies layers defined above.
 ReLu ([`F.relu`](http://docs.chainer.org/en/stable/reference/functions.html#chainer.functions.relu)) layers are inserted after each FC layer, except the final one (Similarly to `L`, `F` is an alias of `chainer.functions`).
-Note that in the original paper, authors applies Dropout after FC layers. But we do not use it and left it to readers. 
+Note that in the original paper, the authors apply Dropout after FC layers. But we do not use it and left it to the readers. 
 
 Q. Confirm that `predictor` defined above has two FC layers, `unit_num` units
 between two FC layers and `C` output units.
 
-Q. In the original paper, the authors used the MLP consists of up to three FC layers. Change the predictor from two-layer to three-layer and check how the final accuracy changes. Try architectures other than MLP.
+Q. In the original paper, the authors used an MLP consisting of up to three FC layers. Change the predictor from two-layer to three-layer and check how the final accuracy changes. Try architectures other than MLP.
 
-Q. Why we should not add ReLu to the final FC layer? See what happens if we do that.
+Q. Why should we not add ReLu to the final FC layer? See what happens if we do that.
 
 Q. In this question, we add Dropout between FC layers and ReLU layers. Be aware that the behavior of Dropout is different during training and test phases. So, we have to change the behavior of the model accordingly. 
 We introduce Drop by following these steps:
@@ -175,7 +175,7 @@ classifier = classifier.Classifier(predictor=predictor)
 ```
 
 `Classifier` is a subclass of `Chain`.
-What it does is simply to take a minibatch, calculate a loss value, and report it:
+Its `__call__` method takes the both the predictor input and the target output for a minibatch, calculates the loss value, and reports it:
 
 ```python
 # lib/models/classifier.py
@@ -189,10 +189,9 @@ class Classifier(chainer.Chain):
         return loss
 ```
 
-You may notice that we use [`F.sigmoid_cross_entorpy`](http://docs.chainer.org/en/stable/reference/functions.html#chainer.functions.sigmoid_cross_entropy)
+You might notice that we use [`F.sigmoid_cross_entorpy`](http://docs.chainer.org/en/stable/reference/functions.html#chainer.functions.sigmoid_cross_entropy)
 in `__call__` instead of applying the singmoid and cross entropy functions separately.
-It is commmon in most deep learning frameworks to combine them if possible for numerically stable computation.
-the sigmoid function with the following cross entropy.
+It is commmon in most deep learning frameworks to combine them when possible to improve numerical stability.
 
 
 # Evaluation
@@ -200,7 +199,7 @@ the sigmoid function with the following cross entropy.
 ## Extension
 
 Trainers are augmented with *Extensions* in Chainer.
-We can make an extension by either decorating a function with
+We can make an extension by either decorating a function with the
 `chainer.training.make_extension` decorator
 or inheriting `chainer.training.Extension` class.
 
@@ -214,7 +213,7 @@ This example uses the extension mechanism to:
 
 ## Accuracy evaluation
 
-There are several ways to evaluate correctness of predictors.
+There are several ways to evaluate the correctness of predictors.
 We use three metrics in this example, namely, *accuracy*, *loss value*, and *AUC*.
 As their implementations are similar, we only look at how the accuracy is computed in detail
 and left the other two for readers.
@@ -258,16 +257,16 @@ trainer.extend(accuracy.AccuracyEvaluator(
     classifier, device=args.gpu))
 ```
 
-Q. Check `AcuracyEvaluator` and `LossEvaluator` how corresponding metrics are evaluated.
+Q. Check `AcuracyEvaluator` and `LossEvaluator` to understand how the corresponding metrics are evaluated.
 
-Q. Implement an extension `PrecisionEvaluator` that computes precision for training and test dataset.
+Q. Implement an extension `PrecisionEvaluator` that computes precision for the training and test datasets.
 
 
-# Unit test
+# Unit testing
 
 Once you implement a function, you need to verify that it works correctly.
-*Unit test* is a common way of testing functions.
-Different from the previous sections, we briefly explain a software engineering aspect of machine learning in this section.
+*Unit tests* are a common way of testing functions.
+Briefly departing from the previous sections, we explain a software engineering aspect of machine learning in this section.
 
 We use [nose](http://nose.readthedocs.io/) for unit testing.
 nose can be installed via `pip` command:
@@ -276,8 +275,8 @@ nose can be installed via `pip` command:
 $ pip install nose
 ```
 
-We just explain the simplest example of unit testing here.
-See the official document of `nose` for the detail.
+We only explain a simple example of unit testing here.
+See the official `nose` documentation for the details.
 
 ## Example: count function
 
@@ -307,9 +306,9 @@ The predicted value is the sign of `y`.
 respectively, but `i`-th sample is *ignored* in `j`-th task if `t[i, j] == -1`.
 
 
-## Testcode of count function
+## Unit testing code for the count function
 
-Here is a test code that checks the behavior of `count` function.
+Here is unit testing code that checks the behavior of `count` function.
 All tests are located in `tests` directory and this unit test is in `tests/test_accuracy.py`.
 
 ```python
@@ -328,9 +327,9 @@ class TestCount(unittest.TestCase):
 
 It creates sample inputs (`y` and `t`),
 feeds the input to the function to be tested, and compares the output
-with expected one.
+with the expected one.
 `np.testing.assert_array_equals` compares thow NumPy ndarrays
-and raises error if they does not agree within specified precision.
+and raises an error if they do not agree within the specified precision.
 
 
 ## Run the test code
@@ -343,7 +342,7 @@ $ nosetests tests/test_accuracy.py
 
 It runs all tests in the file (see [the document](http://nose.readthedocs.io/en/latest/writing_tests.html#writing-tests)
 if you are interested in )
-You will get the result something like this if all tests pass:
+You will get a result something like this if all tests pass:
 
 ```
 $ nosetests tests/test_accuracy.py                                            
@@ -359,50 +358,50 @@ See [the corresponding part](http://nose.readthedocs.io/en/latest/plugins/attrib
  
 
 Q. `count` assumes that `y` is a 2-dimensional float array. But we cannot guarantee that users
-always feed valid inputs. We need to check if inputs are expected one. Change `count` method so that it raises [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) when `y` does not meet the condition above and write a test case that checks this input validation works correctly (Hint: you can use [`unittest.assertRaises`](https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertRaises) to check the function raises an expected error).
+always feed valid inputs. We need to check if the inputs are the expected ones. Change the `count` method so that it raises [`ValueError`](https://docs.python.org/3/library/exceptions.html#ValueError) when `y` does not meet the condition above and write a test case that checks this input validation works correctly (Hint: you can use [`unittest.assertRaises`](https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertRaises) to check the function raises an expected error).
 
 
-## Corner case
+## Corner cases
 
-It is preferable that unit tests can support *corner case* (a.k.a. *edge case*), or
+It is preferable that unit tests check *corner cases* (a.k.a. *edge cases*), or
 a situation that does not occur in normal operation.
 
-Q.  One of corner cases the `count` method has is that all values in a column of `t` are `-1`,
+Q.  One of the corner cases the `count` method has is that all values in a column of `t` are `-1`,
 that is, all samples are ignored by some task.
-In such a case, we cannot calculate accuracy because support is 0, causing division-by-zero.
+In such a case, we cannot calculate the accuracy because the support is 0, causing division-by-zero.
 We determine that if all samples are ignored by some task, the function should return `numpy.inf` as the accuracy for the task 
 Write a test case that checks this behavior. You might need to modify `count` method.
 
-Q. What other corner cases does this function has?
+Q. What other corner cases does this function have?
 
 Q. Write a unit test that checks that `PrecisionEvaluator` (implenented in the former question) correctly calculates precision.
 
 
-## Benefit of unit tests 
+## Benefits of unit tests 
 
-One of the benefit of writing unit tests is its usefulness for debugging.
-You may often run codes and debug-print intermediate outputs to debug them.
+One of the benefits of writing unit tests is its usefulness for debugging.
+You may often run code and debug-print intermediate outputs to debug them.
 Although it is easy and powerful, it is getting harder to find bugs solely with this
-technique as the codes grow.
+technique as the code size grows.
 You can verify the behavior of functions (although not perfectly)
 and narrow down where bugs reside by writing unit tests for suspicious functions.
 
-Unit tests are also beneficial to keep your codes clean and tidy.
+Unit tests are also beneficial to keep your code clean and tidy.
 You will find as you write unit tests that
 it is difficult to write unit tests for huge and monolithic functions.
-Also you may notice that you cannot write test codes unless you clearly determine
+Also you may notice that you cannot write test code unless you clearly determine
 the behavior of the target functions.
 If we want to write unit tests appropriately, functions tend to be small and have clear-cut specification.
 That is another positive side effect of unit testing.
 
 
-## Practical consideration
+## Practical considerations
 
 In practice, however, it is rarely possible to write unit tests for all functionalities
 of all functions in experimental codes.
-This is because contrary to library codes, codes for experiments are subject to change because
+This is because contrary to library codes, the code for experiments is subject to change because
 of many trial & errors.
-So, it is recommended to write tests from the most suspicious and unconfident part if your coding time is limited.
+So, it is recommended to write tests for the most suspicious and unconfident part if your coding time is limited.
 
 
 ## Reference
