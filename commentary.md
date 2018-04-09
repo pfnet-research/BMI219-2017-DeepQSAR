@@ -190,7 +190,7 @@ class Classifier(chainer.Chain):
 ```
 
 You might notice that we use [`F.sigmoid_cross_entorpy`](http://docs.chainer.org/en/stable/reference/functions.html#chainer.functions.sigmoid_cross_entropy)
-in `__call__` instead of applying the singmoid and cross entropy functions separately.
+in `__call__` instead of applying the sigmoid and cross entropy functions separately.
 It is commmon in most deep learning frameworks to combine them when possible to improve numerical stability.
 
 
@@ -248,7 +248,7 @@ So, `correct`, `support`, and `accuracy` are 1-dimensional ndarray that has as m
 
 We insert extensions with `Trainer.extend` method.
 The metrics are computed for both training and validation dataset
-to watch the model does not overfit nor underfit:
+to ensure that the model does not overfit nor underfit:
 
 ```python
 # tools/train.py
